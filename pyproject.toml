@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "axb"
+authors = [{ name = "Julien Tournier", email = "julientou@gmail.com" }]
+dynamic = ["version"]
+requires-python = ">=3.10"
+dependencies = ["ax-platform", "fastapi", "uvicorn[standard]"]
+description = "A RESTFull API to use AX platform from Meta."
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+]
+keywords = [
+    "optimization",
+    "bayesian",
+    "adaptive experiment",
+    "design of experiment",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-sugar", "black", "isort"]
+
+[tool]
+[tool.hatch.version]
+source = "vcs"
