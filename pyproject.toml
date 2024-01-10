@@ -23,8 +23,10 @@ keywords = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-sugar", "black", "isort"]
+dev = ["httpx", "pytest", "pytest-sugar", "black", "isort"]
 
 [tool]
 [tool.hatch.version]
 source = "vcs"
+[tool.hatch.build.hooks.vcs]
+version-file = "axb/_version.py"

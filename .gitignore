@@ -1,0 +1,15 @@
+# version
+axb/_version.py
+
+# Bruno tests
+tests/**/bruno.json
+tests/**/*.bru
+
+# cache
+**/__pycache__
+
+# test cache
+.pytest_cache
+
+# scripting
+*.sh
