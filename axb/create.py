@@ -12,4 +12,4 @@ class AxConfig(BaseModel):
     experiment: Experiment
 
 def create_client_from_json(ax_json):
-    return _AxClient(verbose_logging=False).from_json_snapshot(ax_json)
+    return _AxClient().from_json_snapshot(ax_json)

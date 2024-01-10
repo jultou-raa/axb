@@ -2,8 +2,8 @@
 axb/_version.py
 
 # Bruno tests
-tests/**/bruno.json
-tests/**/*.bru
+axb/tests/**/bruno.json
+axb/tests/**/*.bru
 
 # cache
 **/__pycache__

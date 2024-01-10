@@ -95,3 +95,7 @@ async def save_model(ax_json: dict):
     filename = f"{ax_client.experiment.name}_model.json"
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
     return StreamingResponse(iter([json_bytes.getvalue()]), headers=headers)
+
+# TODO: Special cases https://ax.dev/tutorials/gpei_hartmann_service.html#Special-Cases
+# - [] Evaluation failure
+# - [] Custom trial

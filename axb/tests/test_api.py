@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from axb.api import app
+from axb.tests.utils import load_json
 import json
 import pathlib
 import pytest
@@ -10,12 +11,6 @@ create_json_files = (pathlib.Path(__file__).parent / "create").rglob("*.json")
 generate_json_files = (pathlib.Path(__file__).parent / "generate").rglob("*.json")
 status_json_files = (pathlib.Path(__file__).parent / "status").rglob("*.json")
 register_json_files = (pathlib.Path(__file__).parent / "register").rglob("*.json")
-
-
-def load_json(file_path):
-    with pathlib.Path(file_path).open() as fp:
-        json_data = json.load(fp)
-    return json_data
 
 
 def test_home():

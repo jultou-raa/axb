@@ -12,27 +12,32 @@
       {
         "name": "x2",
         "type": "range",
-        "bounds": [0, 1]
+        "bounds": [0, 1],
+        "value_type": "float"
       },
       {
         "name": "x3",
         "type": "range",
-        "bounds": [0, 1]
+        "bounds": [0, 1],
+        "value_type": "float"
       },
       {
         "name": "x4",
         "type": "range",
-        "bounds": [0, 1]
+        "bounds": [0, 1],
+        "value_type": "float"
       },
       {
         "name": "x5",
         "type": "range",
-        "bounds": [0, 1]
+        "bounds": [0, 1],
+        "value_type": "float"
       },
       {
         "name": "x6",
         "type": "range",
-        "bounds": [0, 1]
+        "bounds": [0, 1],
+        "value_type": "float"
       }
     ],
     "parameter_constraints": ["x1 + x2 <= 2.0"],
