@@ -1,20 +1,47 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from io import BytesIO
 from fastapi.responses import StreamingResponse
 from ax.service.ax_client import ObjectiveProperties
 from axb.axclient import _AxClient
 from ax.version import version as ax_version
 from axb._version import __version__
-from axb.create import AxConfig, create_client_from_json
-from axb.evaluate import AxTrialResults
+from axb.models import (
+    AxConfig,
+    AxTrialResults,
+    ExperimentId,
+    NextTrialResponse,
+    StatusResponse,
+    ExperimentList,
+)
+from axb.db import save_experiment, load_experiment, update_experiment, list_experiments
+from axb.logging import setup_logging
 import json
+import logging
 
 app = FastAPI(version=__version__)
 
+setup_logging()
 
-def transition_index(axclient: _AxClient):
-    model_transition = axclient.generation_strategy.model_transitions
-    return model_transition[0] if len(model_transition) > 0 else 1
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Unhandled exception: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal server error"},
+    )
+
+
+@app.get("/experiments", response_model=ExperimentList)
+def get_experiments():
+    return list_experiments()
+
+
+@app.get("/experiments/{experiment_id}", response_model=dict)
+def get_experiment(experiment_id: str):
+    ax_client = load_experiment(experiment_id)
+    return ax_client.to_json_snapshot()
 
 
 @app.get("/")
@@ -22,8 +49,8 @@ def home():
     return {"api_version": __version__, "ax_version": ax_version}
 
 
-@app.post("/create")
-def read_root(ax_config: AxConfig):
+@app.post("/create", response_model=ExperimentId)
+def create_experiment(ax_config: AxConfig):
     client = _AxClient(verbose_logging=False)
 
     # Update objective dict
@@ -32,53 +59,53 @@ def read_root(ax_config: AxConfig):
         "maximize": ObjectiveProperties(minimize=False),
     }
 
-    ax_config.experiment.objectives = {
+    objectives = {
         k: target[v] for k, v in ax_config.experiment.objectives.items()
     }
+
+    choose_gs_kwargs = None
+    if ax_config.generation_strategy:
+        choose_gs_kwargs = {"steps": ax_config.generation_strategy}
 
     client.create_experiment(
         parameters=ax_config.experiment.parameters,
         name=ax_config.experiment.name,
         parameter_constraints=ax_config.experiment.parameter_constraints,
         outcome_constraints=ax_config.experiment.outcome_constraints,
-        objectives=ax_config.experiment.objectives,
+        objectives=objectives,
+        choose_generation_strategy_kwargs=choose_gs_kwargs,
     )
-    return client.to_json_snapshot()
+    return save_experiment(client)
 
 
-@app.post("/next")
-def generate_trial(ax_json: dict, batch_size: int = 1):
-    ax_client = create_client_from_json(ax_json)
+@app.post("/next", response_model=NextTrialResponse)
+def generate_trial(experiment_id: str, batch_size: int = 1):
+    ax_client = load_experiment(experiment_id)
     trial_to_run, optim_complete = ax_client.get_next_trials(batch_size)
+    update_experiment(experiment_id, ax_client)
     return {
         "trial_to_run": [
             {"id": trial_id, "parameters": trial}
             for trial_id, trial in trial_to_run.items()
-        ],
-        "ax_client": ax_client.to_json_snapshot(),
+        ]
     }
 
 
-@app.post("/register")
+@app.post("/register", response_model=StatusResponse)
 def register_trial_value(record: AxTrialResults):
-    ax_json = record.ax_client
-    trial_ids = record.trial_ids
-    trial_values = record.trial_values
-    ax_client = create_client_from_json(ax_json)
-    for trial_id, trial_value in zip(trial_ids, trial_values):
+    ax_client = load_experiment(record.experiment_id)
+    for trial_id, trial_value in zip(record.trial_ids, record.trial_values):
         ax_client.complete_trial(trial_id, trial_value)  # type: ignore
-    return {
-        "ax_client": ax_client.to_json_snapshot(),
-    }
+    update_experiment(record.experiment_id, ax_client)
+    return {"status": "success"}
 
 
 @app.post("/status")
-def get_model_status(ax_json: dict):
-    ax_client = create_client_from_json(ax_json)
-    if any(ax_client.completed_trials.values()):
+def get_model_status(experiment_id: str):
+    ax_client = load_experiment(experiment_id)
+    if not ax_client.completed_trials.empty:
         optim_info = {
             "current_measured_optimal_parameters": ax_client.get_best_parameters(),
-            "current_estimated_optimal_parameters": ax_client.get_best_parameters_from_model(),
         }
     else:
         optim_info = {}
@@ -88,9 +115,9 @@ def get_model_status(ax_json: dict):
 
 
 @app.post("/save")
-async def save_model(ax_json: dict):
+async def save_model(experiment_id: str):
     # Convert JSON string to bytes object
-    ax_client = create_client_from_json(ax_json)
+    ax_client = load_experiment(experiment_id)
     json_bytes = BytesIO(json.dumps(ax_client.to_json_snapshot()).encode())
     filename = f"{ax_client.experiment.name}_model.json"
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
