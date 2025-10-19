@@ -11,8 +11,5 @@ axb/tests/**/*.bru
 # test cache
 .pytest_cache
 
-# data
-experiments/
-
 # scripting
-*.sh
+*.shexperiments/

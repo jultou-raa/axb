@@ -15,14 +15,11 @@ class AxConfig(BaseModel):
     generation_strategy: List[Dict] = []
 
 class AxTrialResults(BaseModel):
-    experiment_id: str
+    ax_client: dict
     trial_ids: List[int]
     trial_values: List[Dict[str, Tuple[float, float]]]
 
 # Response Models
-
-class ExperimentId(BaseModel):
-    experiment_id: str
 
 class TrialToRun(BaseModel):
     id: int
@@ -30,17 +27,7 @@ class TrialToRun(BaseModel):
 
 class NextTrialResponse(BaseModel):
     trial_to_run: List[TrialToRun]
+    ax_client: dict
 
-class StatusResponse(BaseModel):
-    status: str
-
-class ExperimentDetails(BaseModel):
-    name: str
-    best_arm_parameters: Dict[str, Any]
-    best_arm_predictions: Dict[str, Tuple[float, float]]
-
-class ExperimentListItem(BaseModel):
-    experiment_id: str
-
-class ExperimentList(BaseModel):
-    experiments: List[ExperimentListItem]
+class RegisterTrialResponse(BaseModel):
+    ax_client: dict
