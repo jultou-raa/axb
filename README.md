@@ -16,37 +16,73 @@ service API, enhancing its accessibility and integration capabilities.
 - Python
 - FastAPI
 - ax-platform
+- Hatch (project and environment management via pyproject.toml)
 
-<!--## Installation
+## Starting the server and accessing API documentation
 
-1. Clone the repository:
+This project uses pyproject.toml and Hatch (hatch) for environment and dependency management.
 
-   ```bash
-   git clone https://github.com/<your-username>/<repo-name>.git
-   ```
+1. Install Hatch
+   - Recommended (isolated): using pipx
+     ```bash
+     pipx install hatch
+     ```
+   - Or with pip:
+     ```bash
+     pip install hatch
+     ```
 
-2. Install dependencies:
+2. Create the project environment and install dependencies
+   - Create the environment defined in pyproject.toml:
+     ```bash
+     hatch env create
+     ```
+   - Alternatively, run commands inside the project environment without first creating it explicitly using:
+     ```bash
+     hatch run <command>
+     ```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+3. Start the server
+   - Run the FastAPI app inside the hatch environment:
+     ```bash
+     hatch run uvicorn axb.api:app --reload --host 0.0.0.0 --port 8000
+     ```
+     or
+     ```bash
+     hatch run python -m uvicorn axb.api:app --reload --host 0.0.0.0 --port 8000
+     ```
+   - The FastAPI application is defined in the `axb.api` module (app variable).
 
+4. Open the API documentation
+   - Swagger UI (interactive): http://127.0.0.1:8000/docs
+   - ReDoc: http://127.0.0.1:8000/redoc
 
-## Usage
+5. Quick sanity checks / usage examples
+   - Health / version endpoint:
+     ```bash
+     hatch run curl http://127.0.0.1:8000/
+     ```
+   - Example endpoints (use JSON bodies as shown in the `axb/tests` folder):
+     - POST /create
+     - POST /next
+     - POST /register
+     - POST /status
 
-1. Initiate the API server:
+6. Running tests
+   - Run tests inside the hatch environment:
+     ```bash
+     hatch run pytest -q
+     ```
+   - If a separate test environment is defined in pyproject.toml, create it first:
+     ```bash
+     hatch env create <env-name>
+     hatch run -e <env-name> pytest -q
+     ```
 
-   ```bash
-   python app.py
-   ```
-
-2. Interact with the API endpoints using tools like Postman or curl.
-
-## API Documentation
-
-- Detailed API documentation is available at (insert link or path to
-  documentation).
--->
+Notes:
+- If you run into import issues when starting the server, ensure your current working directory is the project root so Python can import the `axb` package (or set PYTHONPATH accordingly).
+- Replace host/port values as needed for deployment environments.
+- See pyproject.toml for the list of dependencies and any environment-specific configuration.
 
 ## Contributing
 
