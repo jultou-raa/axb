@@ -1,0 +1,5 @@
+site_name: REST API for Ax-platform Bayesian Hyperparameter Optimization
+theme:
+  name: material
+nav:
+  - Home: index.md
