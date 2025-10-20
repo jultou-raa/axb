@@ -41,12 +41,12 @@ def test_hartmann6_optim():
     status = test_client.post("/status", json=serialized_ax_client)
     assert status.status_code == 200
 
-    parameters = status.json()['current_estimated_optimal_parameters']
+    parameters = status.json()['current_estimated_optimal_parameters'][0]
 
     print("Best parameters :", parameters)
     print("Hartmann6 value is", evaluate(parameters))
 
     print("Best known value is", hartmann6.fmin)
-    
+
 if __name__ == "__main__":
     test_hartmann6_optim()
