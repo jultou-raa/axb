@@ -1,30 +1,15 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from io import BytesIO
 from fastapi.responses import StreamingResponse
-from ax.generation_strategy.dispatch_utils import choose_generation_strategy_legacy
 from ax.service.ax_client import ObjectiveProperties
 from axb.axclient import _AxClient
 from ax.version import version as ax_version
 from axb._version import __version__
-from axb.models import AxConfig, AxTrialResults, NextTrialResponse, RegisterTrialResponse
-from axb.create import create_client_from_json
-from axb.logging import setup_logging
+from axb.create import AxConfig, create_client_from_json
+from axb.evaluate import AxTrialResults
 import json
-import logging
 
 app = FastAPI(version=__version__)
-
-setup_logging()
-
-
-@app.exception_handler(Exception)
-async def unhandled_exception_handler(request: Request, exc: Exception):
-    logging.error(f"Unhandled exception: {exc}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"message": "Internal server error"},
-    )
 
 
 def transition_index(axclient: _AxClient):
@@ -37,19 +22,9 @@ def home():
     return {"api_version": __version__, "ax_version": ax_version}
 
 
-def get_generation_strategy(ax_config: AxConfig):
-    if ax_config.generation_strategy:
-        return choose_generation_strategy_legacy(
-            search_space=ax_config.experiment.parameters,
-            generation_strategy_kwargs={"steps": ax_config.generation_strategy},
-        )
-    return None
-
-
 @app.post("/create")
 def read_root(ax_config: AxConfig):
-    generation_strategy = get_generation_strategy(ax_config)
-    client = _AxClient(generation_strategy=generation_strategy, verbose_logging=False)
+    client = _AxClient(verbose_logging=False)
 
     # Update objective dict
     target = {
@@ -57,7 +32,7 @@ def read_root(ax_config: AxConfig):
         "maximize": ObjectiveProperties(minimize=False),
     }
 
-    objectives = {
+    ax_config.experiment.objectives = {
         k: target[v] for k, v in ax_config.experiment.objectives.items()
     }
 
@@ -66,12 +41,12 @@ def read_root(ax_config: AxConfig):
         name=ax_config.experiment.name,
         parameter_constraints=ax_config.experiment.parameter_constraints,
         outcome_constraints=ax_config.experiment.outcome_constraints,
-        objectives=objectives,
+        objectives=ax_config.experiment.objectives,
     )
     return client.to_json_snapshot()
 
 
-@app.post("/next", response_model=NextTrialResponse)
+@app.post("/next")
 def generate_trial(ax_json: dict, batch_size: int = 1):
     ax_client = create_client_from_json(ax_json)
     trial_to_run, optim_complete = ax_client.get_next_trials(batch_size)
@@ -84,7 +59,7 @@ def generate_trial(ax_json: dict, batch_size: int = 1):
     }
 
 
-@app.post("/register", response_model=RegisterTrialResponse)
+@app.post("/register")
 def register_trial_value(record: AxTrialResults):
     ax_json = record.ax_client
     trial_ids = record.trial_ids
@@ -100,9 +75,10 @@ def register_trial_value(record: AxTrialResults):
 @app.post("/status")
 def get_model_status(ax_json: dict):
     ax_client = create_client_from_json(ax_json)
-    if not ax_client.completed_trials.empty:
+    if any(ax_client.completed_trials.values()):
         optim_info = {
             "current_measured_optimal_parameters": ax_client.get_best_parameters(),
+            "current_estimated_optimal_parameters": ax_client.get_best_parameters(),
         }
     else:
         optim_info = {}

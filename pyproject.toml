@@ -30,3 +30,9 @@ dev = ["httpx", "pytest", "pytest-sugar", "black", "isort"]
 source = "vcs"
 [tool.hatch.build.hooks.vcs]
 version-file = "axb/_version.py"
+
+[tool.hatch.envs.default]
+features = ["dev"]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest"

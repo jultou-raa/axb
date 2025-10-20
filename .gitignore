@@ -12,4 +12,4 @@ axb/tests/**/*.bru
 .pytest_cache
 
 # scripting
-*.shexperiments/
+*.sh

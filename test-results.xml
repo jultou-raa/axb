@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="3" failures="0" skipped="0" tests="3" time="7.486" timestamp="2025-10-20T10:40:46.903775+00:00" hostname="devbox"><testcase classname="" name="axb.tests.test_api" time="0.000"><error message="collection failure">ImportError while importing test module '/app/axb/tests/test_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/jules/.pyenv/versions/3.12.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+axb/tests/test_api.py:2: in &lt;module&gt;
+    from axb.api import app
+axb/api.py:5: in &lt;module&gt;
+    from axb.axclient import _AxClient
+axb/axclient.py:5: in &lt;module&gt;
+    from ax.modelbridge.registry import Models
+E   ModuleNotFoundError: No module named 'ax.modelbridge'</error></testcase><testcase classname="" name="axb.tests.test_db_api" time="0.000"><error message="collection failure">ImportError while importing test module '/app/axb/tests/test_db_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/jules/.pyenv/versions/3.12.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+axb/tests/test_db_api.py:5: in &lt;module&gt;
+    from axb.api import app
+axb/api.py:5: in &lt;module&gt;
+    from axb.axclient import _AxClient
+axb/axclient.py:5: in &lt;module&gt;
+    from ax.modelbridge.registry import Models
+E   ModuleNotFoundError: No module named 'ax.modelbridge'</error></testcase><testcase classname="" name="axb.tests.test_optimization" time="0.000"><error message="collection failure">ImportError while importing test module '/app/axb/tests/test_optimization.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/jules/.pyenv/versions/3.12.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+axb/tests/test_optimization.py:3: in &lt;module&gt;
+    from axb.api import app
+axb/api.py:5: in &lt;module&gt;
+    from axb.axclient import _AxClient
+axb/axclient.py:5: in &lt;module&gt;
+    from ax.modelbridge.registry import Models
+E   ModuleNotFoundError: No module named 'ax.modelbridge'</error></testcase></testsuite></testsuites>
