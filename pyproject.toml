@@ -32,6 +32,7 @@ source = "vcs"
 version-file = "axb/_version.py"
 
 [tool.hatch.envs.default]
+installer = "uv"
 features = ["dev"]
 
 [tool.hatch.envs.default.scripts]

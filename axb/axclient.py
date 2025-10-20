@@ -1,22 +1,27 @@
+"""
+This module provides a custom AxClient class, `_AxClient`, which extends the functionality
+of the base `AxClient` for this specific application.
+"""
 from ax.service.ax_client import AxClient
-from ax.generation_strategy.generation_node import GenerationStep
-from ax.core.observation import ObservationFeatures
-from ax.api.utils.generation_strategy_dispatch import choose_generation_strategy
-from ax.generators.torch.botorch_modular.generator import BoTorchGenerator
-import torch
-from botorch.models.gp_regression import SingleTaskGP
-from botorch.acquisition import qUpperConfidenceBound
+
 
 class _AxClient(AxClient):
-    @property
-    def transition_index(self):
-        model_transition = self.generation_strategy.model_transitions
-        return model_transition[0] if len(model_transition) > 0 else 1
+    """
+    A custom AxClient that provides additional properties for easier access to
+    experiment information.
+    """
 
     @property
-    def direction_translation(self):
-        return {True: "minimiser", False: "maximiser", None: "non définit"}
+    def transition_index(self):
+        """
+        Returns the index of the first model transition in the generation strategy.
+        """
+        model_transitions = self.generation_strategy.model_transitions
+        return model_transitions[0] if model_transitions else 1
 
     @property
     def completed_trials(self):
+        """
+        Fetches the results of all completed trials in the experiment.
+        """
         return self.experiment.fetch_data_results()
